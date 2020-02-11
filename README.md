@@ -1,7 +1,9 @@
 # Reset Ease
  Resets the ease of an entire Anki collection to 250%
 
-See this Ankiweb page for more details: https://ankiweb.net/shared/info/947935257
+ See this link for Ankiweb download and details: https://ankiweb.net/shared/info/947935257
+ 
+
 ---
 **Please consider supporting us via:**
 
