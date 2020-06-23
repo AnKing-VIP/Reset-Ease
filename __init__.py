@@ -29,7 +29,7 @@ class ResetEase(QDialog):
             deck_id = item["id"]
             self.deck_chooser.addItem(deck_name, deck_id)
             did_list.append(deck_id)
-        ease_label = QLabel("Enter Ease: ")
+        ease_label = QLabel("Ease: ")
         ease_label.setFixedWidth(60)
         self.ease_spinbox = QSpinBox()
         self.ease_spinbox.setFixedWidth(200)
@@ -64,7 +64,10 @@ class ResetEase(QDialog):
         anki_ease = user_ease * 10
         reset = askUser("<div style='font-size: 16px'>Reset ease for all cards in \"{}\" to {}%?<br><font color=red>This action can't be undone.</font></div>".format(deck_name, user_ease), defaultno=True, title="Reset Ease")
         if reset:
-            mw.col.db.execute("update cards set factor = ? where did = ?", anki_ease, deck_id)
+            if deck_name == "Whole Collection":
+                mw.col.db.execute("update cards set factor = ?", anki_ease)
+            else:
+                mw.col.db.execute("update cards set factor = ? where did = ?", anki_ease, deck_id)
             showInfo("Ease has been reset to {}%.".format(user_ease), title="Reset Ease")
         else:
             pass
