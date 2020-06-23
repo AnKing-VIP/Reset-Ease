@@ -1,13 +1,4 @@
 # Reset Ease
- Resets the ease of an entire Anki collection to 250%
-
- See this link for Ankiweb download and details: https://ankiweb.net/shared/info/947935257
+ Resets the ease of an entire Anki collection to any value you want.
+ Added a simple UI so you can choose ease value. this is the only difference with the original reset ease on ankingmed
  
-
----
-**Please consider supporting us via:**
-
-* **[Patreon](https://www.patreon.com/ankingmed)**- _Get individualized Anki, Premed or Med school help_
-* **[YouTube](https://www.youtube.com/theanking)**- _Anki tutorials_
-* **[Website](https://www.ankingmed.com)**- _USMLE Step 1 deck, discount codes, recommended add-ons, etc_
-* **[Instagram](https://www.instagram.com/ankingmed)**/**[Facebook](https://www.facebook.com/ankingmed)**
