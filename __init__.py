@@ -29,7 +29,7 @@ class ResetEase(QDialog):
             deck_id = item["id"]
             self.deck_chooser.addItem(deck_name, deck_id)
             did_list.append(deck_id)
-        ease_label = QLabel("Enter Ease: ")
+        ease_label = QLabel("Ease: ")
         ease_label.setFixedWidth(60)
         self.ease_spinbox = QSpinBox()
         self.ease_spinbox.setFixedWidth(200)
