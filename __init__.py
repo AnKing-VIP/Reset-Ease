@@ -64,11 +64,21 @@ class ResetEase(QDialog):
         anki_ease = user_ease * 10
         reset = askUser("<div style='font-size: 16px'>Reset ease for all cards in \"{}\" to {}%?<br><font color=red>This action can't be undone.</font></div>".format(deck_name, user_ease), defaultno=True, title="Reset Ease")
         if reset:
+            # Fetch all cards to update.
             if deck_name == "Whole Collection":
-                mw.col.db.execute("update cards set factor = ?", anki_ease)
+                card_ids = mw.col.db.list("SELECT id FROM cards WHERE factor != 0")
             else:
-                mw.col.db.execute("update cards set factor = ? where did = ?", anki_ease, deck_id)
-            showInfo("Ease has been reset to {}%.".format(user_ease), title="Reset Ease")
+                card_ids = mw.col.db.list("SELECT id FROM cards WHERE factor != 0 AND did = ?", deck_id)
+            # Update and flush the cards so on sync they will be gracefully updated.
+            num_cards = 0
+            for card_id in card_ids:
+                card = mw.col.getCard(card_id)
+                # Don't touch cards which already have the requested ease.
+                if card.factor != anki_ease:
+                    card.factor = anki_ease
+                    card.flush()
+                    num_cards += 1
+            showInfo("Ease factor of {} card{} has been reset to {}%.".format(num_cards, "s" if num_cards != 1 else "", user_ease), title="Reset Ease")
         else:
             pass
 
