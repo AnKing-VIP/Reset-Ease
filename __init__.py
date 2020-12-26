@@ -25,17 +25,20 @@ class DlgResetEase(QDialog):
         decks = {item["name"]:item["id"] for item in mw.col.decks.all()}
         for name in sorted(decks.keys()):
             self._deck_chooser.addItem(name, decks[name])
-        self._deck_chooser.activated.connect(self._describe)
+        self._deck_chooser.activated.connect(self._changed)
+
+        self._operator = QComboBox()
+        self._operator.addItem('equal to', '=')
+        self._operator.addItem('less than or equal to', '<=')
+        self._operator.addItem('any', None)
+        self._operator.activated.connect(self._changed)
 
         self._new_ease = self._spinbox(250, '250% is the default Anki starting ease')
         self._old_ease = self._spinbox(130, '130% is the value for cards stuck in Anki "ease hell"')
-        self._any_old_ease = QCheckBox()
-        self._any_old_ease.setText('any')
-        self._any_old_ease.toggled.connect(self._toggled)
  
         self._explanation = QLabel()
         self._explanation.setWordWrap(True)
-        self._describe()
+        self._changed()
 
         buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         buttonBox.accepted.connect(self.accept)
@@ -45,15 +48,15 @@ class DlgResetEase(QDialog):
         layout.addWidget(self._label('Deck: '), 0, 0)
         layout.addWidget(self._deck_chooser, 0, 1, 1, 2)
         layout.addWidget(self._label('Old ease: '), 1, 0)
-        layout.addWidget(self._old_ease, 1, 1)
-        layout.addWidget(self._any_old_ease, 1, 2)
-        layout.addWidget(self._label('New ease: '), 2, 0)
-        layout.addWidget(self._new_ease, 2, 1)
-        layout.addWidget(QHSeparationLine(), 3, 0, 1, 3)
-        layout.addWidget(self._explanation, 4, 0, 1, 3)
-        layout.addWidget(QLabel('<font color=red>This action cannot be undone.</font>'), 5, 0, 1, 3)
-        layout.addWidget(QHSeparationLine(), 6, 0, 1, 3)
-        layout.addWidget(buttonBox, 7, 0, 1, 3)
+        layout.addWidget(self._operator, 1, 1, 1, 2)
+        layout.addWidget(self._old_ease, 2, 1)
+        layout.addWidget(self._label('New ease: '), 3, 0)
+        layout.addWidget(self._new_ease, 3, 1)
+        layout.addWidget(QHSeparationLine(), 4, 0, 1, 3)
+        layout.addWidget(self._explanation, 5, 0, 1, 3)
+        layout.addWidget(QLabel('<font color=red>This action cannot be undone.</font>'), 6, 0, 1, 3)
+        layout.addWidget(QHSeparationLine(), 7, 0, 1, 3)
+        layout.addWidget(buttonBox, 8, 0, 1, 3)
         self.setLayout(layout)
 
     def _spinbox(self, value, tooltip):
@@ -63,7 +66,7 @@ class DlgResetEase(QDialog):
         spinbox.setSuffix("%")
         spinbox.setSingleStep(10)
         spinbox.setToolTip(tooltip)
-        spinbox.valueChanged.connect(self._describe)
+        spinbox.valueChanged.connect(self._changed)
         return spinbox
 
     def _label(self, text):
@@ -71,17 +74,16 @@ class DlgResetEase(QDialog):
         label.setFixedWidth(90)
         return label
 
-    def _toggled(self):
-        self._old_ease.setEnabled(not self._any_old_ease.isChecked())
-        self._describe()
-
-    def _describe(self):
+    def _changed(self):
+        old_ease_specified = self._operator.currentData() is not None
         (sql, params) = self.sql('count(*)')
         n = mw.col.db.scalar(sql, *params)
         d = 'the {0} deck'.format(self._deck_chooser.currentText()) if self._deck_chooser.currentData() else 'any deck' 
-        e = 'a different ease' if self._any_old_ease.isChecked() else 'an ease of {0}%'.format(self._old_ease.value())
+        e = 'an ease {0} {1}%'.format(self._operator.currentText(), self._old_ease.value()) if old_ease_specified else 'a different ease'
         s = 'Press OK to change the ease to {0}% for the {1} cards in {2} which currently have {3}.\n'.format(self.new_ease(), n, d, e)
         self._explanation.setText(s)
+        self._old_ease.setEnabled(old_ease_specified)
+        self._old_ease.setVisible(old_ease_specified)
 
     def new_ease(self):
         return self._new_ease.value()
@@ -90,14 +92,13 @@ class DlgResetEase(QDialog):
         predicates = []
         parameters = []
     
-        # don't touch cards which already have the requested new ease.
+        # don't touch cards which have not been reviwed or already have the requested new ease.
+        predicates.append('factor != 0')
         predicates.append('factor != ?')
         parameters.append(self._new_ease.value() * 10)
     
-        if self._any_old_ease.isChecked():
-            predicates.append('factor != 0')
-        else:
-            predicates.append('factor = ?')
+        if self._operator.currentData():
+            predicates.append('factor {0} ?'.format(self._operator.currentData()))
             parameters.append(self._old_ease.value() * 10)
     
         if self._deck_chooser.currentData() is not None:
