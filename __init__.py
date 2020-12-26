@@ -30,6 +30,7 @@ class DlgResetEase(QDialog):
         self._operator = QComboBox()
         self._operator.addItem('equal to', '=')
         self._operator.addItem('less than or equal to', '<=')
+        self._operator.addItem('greater than or equal to', '>=')
         self._operator.addItem('any', None)
         self._operator.activated.connect(self._changed)
 
