@@ -10,15 +10,15 @@ class QHSeparationLine(QFrame):
         super().__init__()
         self.setMinimumWidth(1)
         self.setFixedHeight(20)
-        self.setFrameShape(QFrame.HLine)
-        self.setFrameShadow(QFrame.Sunken)
-        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
+        self.setFrameShape(QFrame.Shape.HLine)
+        self.setFrameShadow(QFrame.Shadow.Sunken)
+        self.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Minimum)
 
 class DlgResetEase(QDialog):
     def __init__(self, parent=mw):
         super(DlgResetEase, self).__init__(parent)
         self.setWindowTitle("Reset Ease")
-        self.setWindowFlags(Qt.Dialog | Qt.MSWindowsFixedSizeDialogHint)
+        self.setWindowFlags(Qt.WindowType.Dialog | Qt.WindowType.MSWindowsFixedSizeDialogHint)
 
         self._deck_chooser = QComboBox()
         self._deck_chooser.addItem('Whole Collection', None)
@@ -41,7 +41,7 @@ class DlgResetEase(QDialog):
         self._explanation.setWordWrap(True)
         self._changed()
 
-        buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        buttonBox = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         buttonBox.accepted.connect(self.accept)
         buttonBox.rejected.connect(self.reject)
 
